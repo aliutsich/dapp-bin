@@ -1,3 +1,5 @@
+pragma solidity ^0.4.0;
+
 //sol Wallet
 // Multi-sig, daily-limited account proxy/wallet.
 // @authors:
@@ -10,7 +12,7 @@
 // interior is executed.
 contract multiowned {
 
-	// TYPES
+    // TYPES
 
     // struct for the status of a pending operation.
     struct PendingState {
@@ -19,7 +21,7 @@ contract multiowned {
         uint index;
     }
 
-	// EVENTS
+    // EVENTS
 
     // this contract only has six types of events: it can accept a confirmation, in which case
     // we record owner and operation (hash) alongside it.
@@ -32,22 +34,22 @@ contract multiowned {
     // the last one is emitted if the required signatures change
     event RequirementChanged(uint newRequirement);
 
-	// MODIFIERS
+    // MODIFIERS
 
     // simple single-sig function modifier.
     modifier onlyowner {
         if (isOwner(msg.sender))
-            _
+            _;
     }
     // multi-sig function modifier: the operation must have an intrinsic hash in order
     // that later attempts can be realised as the same underlying operation and
     // thus count as confirmations.
     modifier onlymanyowners(bytes32 _operation) {
         if (confirmAndCheck(_operation))
-            _
+            _;
     }
 
-	// METHODS
+    // METHODS
 
     // constructor is given number of sigs required to do protected "onlymanyowners" transactions
     // as well as the selection of addresses capable of confirming them.
@@ -206,7 +208,7 @@ contract multiowned {
         delete m_pendingIndex;
     }
         
-   	// FIELDS
+    // FIELDS
 
     // the number of owners that must confirm the same operation before it is run.
     uint public m_required;
@@ -228,15 +230,15 @@ contract multiowned {
 // uses is specified in the modifier.
 contract daylimit is multiowned {
 
-	// MODIFIERS
+    // MODIFIERS
 
     // simple modifier for daily limit.
     modifier limitedDaily(uint _value) {
         if (underLimit(_value))
-            _
+            _;
     }
 
-	// METHODS
+    // METHODS
 
     // constructor - stores initial daily limit and records the present day's index.
     function daylimit(uint _limit) {
@@ -273,7 +275,7 @@ contract daylimit is multiowned {
     // determines today's index.
     function today() private constant returns (uint) { return now / 1 days; }
 
-	// FIELDS
+    // FIELDS
 
     uint public m_dailyLimit;
     uint public m_spentToday;
@@ -283,7 +285,7 @@ contract daylimit is multiowned {
 // interface contract for multisig proxy contracts; see below for docs.
 contract multisig {
 
-	// EVENTS
+    // EVENTS
 
     // logged events:
     // Funds has arrived into the wallet (record how much).
@@ -308,7 +310,7 @@ contract multisig {
 // Wallet(w).from(anotherOwner).confirm(h);
 contract Wallet is multisig, multiowned, daylimit {
 
-	// TYPES
+    // TYPES
 
     // Transaction structure to remember details of transaction lest it need be saved for a later call.
     struct Transaction {
@@ -331,7 +333,7 @@ contract Wallet is multisig, multiowned, daylimit {
     }
     
     // gets called when no other function matches
-    function() {
+    function() payable {
         // just being sent some cash?
         if (msg.value > 0)
             Deposit(msg.sender, msg.value);
@@ -379,7 +381,7 @@ contract Wallet is multisig, multiowned, daylimit {
         super.clearPending();
     }
 
-	// FIELDS
+    // FIELDS
 
     // pending transactions we have at present.
     mapping (bytes32 => Transaction) m_txs;
